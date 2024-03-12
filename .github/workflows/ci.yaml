@@ -1,0 +1,45 @@
+name: pipeline
+
+# 指定觸發條件
+on:
+  # 允許手動執行
+  workflow_dispatch:
+  # 建立 PR 時觸發
+  pull_request:
+  # Push 到指定分支時時觸發
+  push:
+    branches:
+      - develop
+      - master
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    container: node:16-bullseye
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+
+      - name: Cache Node.js modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Run unit test with coverage
+        run: yarn lerna run test:cov --since=origin/develop
+
+      - name: Run e2e test
+        run: yarn lerna run test:e2e --since=origin/develop
+
+      - name: Compile TypeScript code to JavaScript
+        run: yarn lerna run build --since=origin/develop
