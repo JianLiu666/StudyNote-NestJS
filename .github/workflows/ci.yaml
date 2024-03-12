@@ -2,15 +2,8 @@ name: pipeline
 
 # 指定觸發條件
 on:
-  # 允許手動執行
+  # 僅允許手動執行
   workflow_dispatch:
-  # 建立 PR 時觸發
-  pull_request:
-  # Push 到指定分支時時觸發
-  push:
-    branches:
-      - develop
-      - main
 
 jobs:
   smoke-test:
@@ -22,7 +15,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "16"
+          node-version: "18"
 
       - name: Cache Node.js modules
         uses: actions/cache@v2
