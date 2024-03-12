@@ -29,10 +29,10 @@ jobs:
         run: yarn install
 
       - name: Run unit testing with coverage
-        run: yarn lerna run test:cov #--since=origin/main
+        run: yarn lerna run test:cov --since=origin/main
 
       - name: Run end-to-end testing
-        run: yarn lerna run test:e2e #--since=origin/main
+        run: yarn lerna run test:e2e --since=origin/main
 
       - name: Compile TypeScript code to JavaScript code
-        run: yarn lerna run build #--since=origin/main
+        run: yarn lerna run build --since=origin/main
