@@ -1,6 +1,7 @@
 # Folders
 node_modules/
 coverage/
+dist/
 
 # Files
 package-lock.json
