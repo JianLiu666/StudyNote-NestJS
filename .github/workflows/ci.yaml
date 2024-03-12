@@ -20,6 +20,7 @@ jobs:
       - name: Cache Node.js modules
         uses: actions/cache@v2
         with:
+          fetch-depth: 0
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
