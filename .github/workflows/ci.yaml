@@ -15,7 +15,7 @@ on:
 jobs:
   smoke-test:
     runs-on: ubuntu-latest
-    container: node:16-bullseye
+    container: node:18-bullseye
     steps:
       - uses: actions/checkout@v2
 
@@ -35,11 +35,11 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Run unit test with coverage
+      - name: Run unit testing with coverage
         run: yarn lerna run test:cov --since=origin/develop
 
-      - name: Run e2e test
+      - name: Run end-to-end testing
         run: yarn lerna run test:e2e --since=origin/develop
 
-      - name: Compile TypeScript code to JavaScript
+      - name: Compile TypeScript code to JavaScript code
         run: yarn lerna run build --since=origin/develop
