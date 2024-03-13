@@ -11,31 +11,28 @@ jobs:
     outputs:
       cache-key: ${{ steps.cache-modules.outputs.cache-key }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
           node-version: "18"
 
-      - name: Generate cache key
-        id: cache-modules
-        run: echo "::set-output name=cache-key::${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}"
-
       - name: Cache Node.js modules
-        uses: actions/cache@v2
+        id: cache-modules
+        uses: actions/cache@v3
         with:
           path: ~/.npm
-          key: ${{ steps.cache-modules.outputs.cache-key }}
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-
+            ${{ runner.os }}-modules-
 
   install-dependencies:
     needs: setup-cache
     runs-on: ubuntu-latest
     container: node:18-bullseye
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
@@ -43,22 +40,22 @@ jobs:
           node-version: "18"
 
       - name: Cache Node.js modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.npm
-          key: ${{ needs.setup-cache.outputs.cache-key }}
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-
+            ${{ runner.os }}-modules-
 
       - name: Install dependencies
         run: yarn install
 
-  unit-test:
+  unit-testing:
     needs: install-dependencies
     runs-on: ubuntu-latest
     container: node:18-bullseye
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
@@ -66,20 +63,22 @@ jobs:
           node-version: "18"
 
       - name: Cache Node.js modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.npm
-          key: ${{ needs.setup-cache.outputs.cache-key }}
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-modules-
 
-      - name: Run unit testing with coverage
-        run: yarn lerna run test:cov
+      - name: Run unit tests
+        run: yarn test:unit
 
-  end-to-end-test:
+  end-to-end-testing:
     needs: install-dependencies
     runs-on: ubuntu-latest
     container: node:18-bullseye
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
@@ -87,20 +86,22 @@ jobs:
           node-version: "18"
 
       - name: Cache Node.js modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.npm
-          key: ${{ needs.setup-cache.outputs.cache-key }}
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-modules-
 
-      - name: Run end-to-end testing
-        run: yarn lerna run test:e2e
+      - name: Run end-to-end tests
+        run: yarn test:e2e
 
-  build:
-    needs: [unit-test, end-to-end-test]
+  build-code:
+    needs: install-dependencies
     runs-on: ubuntu-latest
     container: node:18-bullseye
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
@@ -108,41 +109,12 @@ jobs:
           node-version: "18"
 
       - name: Cache Node.js modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.npm
-          key: ${{ needs.setup-cache.outputs.cache-key }}
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-modules-
 
-      - name: Compile TypeScript code to JavaScript code
-        run: yarn lerna run build
-# jobs:
-#   smoke-test:
-#     runs-on: ubuntu-latest
-#     container: node:18-bullseye
-#     steps:
-#       - uses: actions/checkout@v2 # 確認 checkout 是否過舊
-
-#       - name: Setup Node.js
-#         uses: actions/setup-node@v2
-#         with:
-#           node-version: "18"
-
-#       - name: Cache Node.js modules
-#         uses: actions/cache@v2 # 確認 cache 是否過舊
-#         with:
-#           path: ~/.npm
-#           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-#           restore-keys: |
-#             ${{ runner.os }}-node-
-
-#       - name: Install dependencies
-#         run: yarn install
-
-#       - name: Run unit testing with coverage
-#         run: yarn lerna run test:cov #--since=origin/main
-
-#       - name: Run end-to-end testing
-#         run: yarn lerna run test:e2e #--since=origin/main
-
-#       - name: Compile TypeScript code to JavaScript code
-#         run: yarn lerna run build #--since=origin/main
+      - name: Build code
+        run: yarn build
