@@ -4,15 +4,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  test-and-build:
+  setup:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - task: unit-testing
-          - task: e2e-testing
-          - task: build
     container: node:18-bullseye
+    outputs:
+      cache-key: ${{ steps.cache-keys.outputs.cache-key }}
     steps:
       - uses: actions/checkout@v4
 
@@ -25,14 +21,57 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
+      - name: Generate cache key
+        id: cache-keys
+        run: echo "::set-output name=cache-key::$(date +%s)"
+
+  unit-test:
+    needs: setup
+    runs-on: ubuntu-latest
+    container: node:18-bullseye
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "yarn"
+          cache-dependency-path: ${{ needs.setup.outputs.cache-key }}
+
       - name: Run unit testing with coverage
-        if: matrix.task == 'unit-testing'
         run: yarn lerna run test:cov #--since=origin/main
 
+  e2e-test:
+    needs: setup
+    runs-on: ubuntu-latest
+    container: node:18-bullseye
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "yarn"
+          cache-dependency-path: ${{ needs.setup.outputs.cache-key }}
+
       - name: Run end-to-end testing
-        if: matrix.task == 'e2e-testing'
         run: yarn lerna run test:e2e #--since=origin/main
 
+  build:
+    needs: setup
+    runs-on: ubuntu-latest
+    container: node:18-bullseye
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "yarn"
+          cache-dependency-path: ${{ needs.setup.outputs.cache-key }}
+
       - name: Build code
-        if: matrix.task == 'build'
         run: yarn lerna run build #--since=origin/main
