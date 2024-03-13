@@ -22,8 +22,8 @@ jobs:
         id: cache-modules
         uses: actions/cache@v3
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json') }}
+          path: node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-modules-
 
@@ -38,14 +38,6 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "18"
-
-      - name: Cache Node.js modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-modules-
 
       - name: Install dependencies
         run: yarn install
@@ -65,10 +57,8 @@ jobs:
       - name: Cache Node.js modules
         uses: actions/cache@v3
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-modules-
+          path: node_modules
+          key: ${{ needs.setup-cache.outputs.cache-key }}
 
       - name: Run unit tests
         run: yarn lerna run test:cov
@@ -88,10 +78,8 @@ jobs:
       - name: Cache Node.js modules
         uses: actions/cache@v3
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-modules-
+          path: node_modules
+          key: ${{ needs.setup-cache.outputs.cache-key }}
 
       - name: Run end-to-end tests
         run: yarn lerna run test:e2e
@@ -111,10 +99,8 @@ jobs:
       - name: Cache Node.js modules
         uses: actions/cache@v3
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-modules-
+          path: node_modules
+          key: ${{ needs.setup-cache.outputs.cache-key }}
 
       - name: Build code
         run: yarn lerna run build
