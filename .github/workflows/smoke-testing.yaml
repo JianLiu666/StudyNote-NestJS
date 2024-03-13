@@ -7,8 +7,6 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     container: node:18-bullseye
-    outputs:
-      cache-key: ${{ steps.cache-keys.outputs.cache-key }}
     steps:
       - uses: actions/checkout@v4
 
@@ -18,12 +16,16 @@ jobs:
           node-version: "18"
           cache: "yarn"
 
-      - name: Install dependencies
-        run: yarn install
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
 
-      - name: Generate cache key
-        id: cache-keys
-        run: echo "::set-output name=cache-key::$(date +%s)"
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: yarn install
 
   unit-test:
     needs: setup
@@ -36,11 +38,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "18"
-          cache: "yarn"
-          cache-dependency-path: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
 
       - name: Run unit testing with coverage
-        run: yarn lerna run test:cov #--since=origin/main
+        run: yarn lerna run test:cov
 
   e2e-test:
     needs: setup
@@ -53,11 +59,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "18"
-          cache: "yarn"
-          cache-dependency-path: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
 
       - name: Run end-to-end testing
-        run: yarn lerna run test:e2e #--since=origin/main
+        run: yarn lerna run test:e2e
 
   build:
     needs: setup
@@ -70,8 +80,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "18"
-          cache: "yarn"
-          cache-dependency-path: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
 
       - name: Build code
-        run: yarn lerna run build #--since=origin/main
+        run: yarn lerna run build
