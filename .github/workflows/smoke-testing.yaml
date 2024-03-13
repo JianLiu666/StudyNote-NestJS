@@ -1,8 +1,6 @@
 name: smoke-testing
 
-# 指定觸發條件
 on:
-  # 僅允許手動執行
   workflow_dispatch:
 
 jobs:
@@ -17,7 +15,6 @@ jobs:
           node-version: "18"
 
       - name: Cache Node.js modules
-        id: cache-modules
         uses: actions/cache@v3
         with:
           path: node_modules
@@ -28,16 +25,13 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Update cache-key output
-        id: update-cache-key
-        run: echo "::set-output name=cache-key::${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}"
-
   unit-testing:
     needs: setup-cache
     runs-on: ubuntu-latest
     container: node:18-bullseye
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
@@ -47,7 +41,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: node_modules
-          key: ${{ needs.setup-cache.outputs.cache-key }}
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
       - name: Run unit tests
         run: yarn lerna run test:cov
@@ -58,6 +52,7 @@ jobs:
     container: node:18-bullseye
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
@@ -67,7 +62,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: node_modules
-          key: ${{ needs.setup-cache.outputs.cache-key }}
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
       - name: Run end-to-end tests
         run: yarn lerna run test:e2e
@@ -78,6 +73,7 @@ jobs:
     container: node:18-bullseye
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
@@ -87,7 +83,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: node_modules
-          key: ${{ needs.setup-cache.outputs.cache-key }}
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
       - name: Build code
         run: yarn lerna run build
