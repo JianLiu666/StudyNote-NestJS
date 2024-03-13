@@ -71,7 +71,7 @@ jobs:
             ${{ runner.os }}-modules-
 
       - name: Run unit tests
-        run: yarn test:unit
+        run: yarn lerna run test:cov
 
   end-to-end-testing:
     needs: install-dependencies
@@ -94,7 +94,7 @@ jobs:
             ${{ runner.os }}-modules-
 
       - name: Run end-to-end tests
-        run: yarn test:e2e
+        run: yarn lerna run test:e2e
 
   build-code:
     needs: install-dependencies
@@ -117,4 +117,4 @@ jobs:
             ${{ runner.os }}-modules-
 
       - name: Build code
-        run: yarn build
+        run: yarn lerna run build
