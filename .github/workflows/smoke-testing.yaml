@@ -2,9 +2,16 @@ name: smoke-testing
 
 on:
   workflow_dispatch:
+
 jobs:
-  smoke-test:
+  test-and-build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - task: unit-testing
+          - task: e2e-testing
+          - task: build
     container: node:18-bullseye
     steps:
       - uses: actions/checkout@v4
@@ -19,10 +26,13 @@ jobs:
         run: yarn install
 
       - name: Run unit testing with coverage
+        if: matrix.task == 'unit-testing'
         run: yarn lerna run test:cov #--since=origin/main
 
       - name: Run end-to-end testing
+        if: matrix.task == 'e2e-testing'
         run: yarn lerna run test:e2e #--since=origin/main
 
       - name: Build code
+        if: matrix.task == 'build'
         run: yarn lerna run build #--since=origin/main
