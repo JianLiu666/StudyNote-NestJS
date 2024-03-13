@@ -18,6 +18,10 @@ jobs:
         with:
           node-version: "18"
 
+      - name: Generate cache key
+        id: cache-modules
+        run: echo "::set-output name=cache-key::${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}"
+
       - name: Cache Node.js modules
         uses: actions/cache@v2
         with:
