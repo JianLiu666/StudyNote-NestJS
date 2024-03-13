@@ -2,88 +2,27 @@ name: smoke-testing
 
 on:
   workflow_dispatch:
-
 jobs:
-  setup-cache:
+  smoke-test:
     runs-on: ubuntu-latest
+    container: node:18-bullseye
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: "18"
-
-      - name: Cache Node.js modules
-        uses: actions/cache@v3
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-modules-
+          cache: "yarn"
 
       - name: Install dependencies
         run: yarn install
 
-  unit-testing:
-    needs: setup-cache
-    runs-on: ubuntu-latest
-    container: node:18-bullseye
-    steps:
-      - uses: actions/checkout@v4
+      - name: Run unit testing with coverage
+        run: yarn lerna run test:cov #--since=origin/main
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "18"
-
-      - name: Cache Node.js modules
-        uses: actions/cache@v3
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-
-      - name: Run unit tests
-        run: yarn lerna run test:cov
-
-  end-to-end-testing:
-    needs: setup-cache
-    runs-on: ubuntu-latest
-    container: node:18-bullseye
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "18"
-
-      - name: Cache Node.js modules
-        uses: actions/cache@v3
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-
-      - name: Run end-to-end tests
-        run: yarn lerna run test:e2e
-
-  build-code:
-    needs: setup-cache
-    runs-on: ubuntu-latest
-    container: node:18-bullseye
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "18"
-
-      - name: Cache Node.js modules
-        uses: actions/cache@v3
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - name: Run end-to-end testing
+        run: yarn lerna run test:e2e #--since=origin/main
 
       - name: Build code
-        run: yarn lerna run build
+        run: yarn lerna run build #--since=origin/main
