@@ -8,8 +8,6 @@ on:
 jobs:
   setup-cache:
     runs-on: ubuntu-latest
-    outputs:
-      cache-key: ${{ steps.cache-modules.outputs.cache-key }}
     steps:
       - uses: actions/checkout@v4
 
@@ -27,28 +25,19 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-modules-
 
-  install-dependencies:
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Update cache-key output
+        id: update-cache-key
+        run: echo "::set-output name=cache-key::${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}"
+
+  unit-testing:
     needs: setup-cache
     runs-on: ubuntu-latest
     container: node:18-bullseye
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "18"
-
-      - name: Install dependencies
-        run: yarn install
-
-  unit-testing:
-    needs: install-dependencies
-    runs-on: ubuntu-latest
-    container: node:18-bullseye
-    steps:
-      - uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
@@ -64,12 +53,11 @@ jobs:
         run: yarn lerna run test:cov
 
   end-to-end-testing:
-    needs: install-dependencies
+    needs: setup-cache
     runs-on: ubuntu-latest
     container: node:18-bullseye
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
@@ -85,12 +73,11 @@ jobs:
         run: yarn lerna run test:e2e
 
   build-code:
-    needs: install-dependencies
+    needs: setup-cache
     runs-on: ubuntu-latest
     container: node:18-bullseye
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
