@@ -46,7 +46,7 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
 
       - name: Run unit testing with coverage
-        run: yarn lerna run test:cov
+        run: yarn lerna run test:cov --since=main
 
   e2e-test:
     needs: setup
@@ -67,7 +67,7 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
 
       - name: Run end-to-end testing
-        run: yarn lerna run test:e2e
+        run: yarn lerna run test:e2e --since=main
 
   build:
     needs: setup
@@ -89,23 +89,3 @@ jobs:
 
       - name: Build code
         run: yarn lerna run build
-
-  # sonarcloud-check:
-  #   needs: [unit-test, e2e-test, build]
-  #   runs-on: ubuntu-latest
-  #   container: node:18-bullseye
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0 # SonarCloud scanner needs the full history to compute code coverage
-
-  #     - name: Setup Node.js
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: "18"
-
-  #     - name: SonarCloud Scan
-  #       uses: SonarSource/sonarcloud-github-action@master
-  #       env:
-  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
