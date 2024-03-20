@@ -1,0 +1,20 @@
+name: check-branch-name
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    container: node:18-bullseye
+    steps:
+      # 將 $GITHUB_WORKSPACE 底下的 repository check-out 到 runner 上
+      # 讓我們在 workflow 中可以直接訪問
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check current branch
+        run: |
+          echo "$GITHUB_REF"
+          echo "$GITHUB_REF_NAME"
+          echo "$GITHUB_HEAD_REF"
