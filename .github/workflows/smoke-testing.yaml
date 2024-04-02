@@ -2,13 +2,13 @@ name: Smoke Testing
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     - main
-  #   paths-ignore:
-  #     - "**/package.json"
-  #     - "**/CHANGELOG.md"
-  #     - "**/README.md"
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "**/package.json"
+      - "**/CHANGELOG.md"
+      - "**/README.md"
 
 jobs:
   setup:
