@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -9,6 +10,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { CreateTodoDto } from './dto';
 
 // 路由
 @Controller('todos')
@@ -78,8 +80,8 @@ export class TodoController {
     return list.slice(skip, limit);
   }
 
-  @Patch()
   @HttpCode(HttpStatus.NO_CONTENT) // 使用 decorator 回傳指定狀態碼
+  @Patch()
   patch() {
     return [];
   }
@@ -104,5 +106,22 @@ export class TodoController {
   ) {
     const id = 1;
     return { id, title, description };
+  }
+
+  // 主體資料寫法3
+  @Post('create3')
+  create3(@Body() dto: CreateTodoDto) {
+    const id = 1;
+    return { id, ...dto };
+  }
+
+  @Header('X-RESPONSE-ID', '1')
+  @Get('header/header')
+  getHeader() {
+    return {
+      id: 1,
+      title: 'header',
+      description: '',
+    };
   }
 }
