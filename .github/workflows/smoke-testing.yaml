@@ -45,6 +45,9 @@ jobs:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
 
+      - name: Add Safe Directory to Git
+        run: git config --global --add safe.directory /__w/StudyNote-NestJS/StudyNote-NestJS
+
       - name: Run unit testing with coverage
         run: yarn lerna run test:cov --since=origin/main
 
@@ -63,6 +66,9 @@ jobs:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
 
+      - name: Add Safe Directory to Git
+        run: git config --global --add safe.directory /__w/StudyNote-NestJS/StudyNote-NestJS
+
       - name: Run end-to-end testing
         run: yarn lerna run test:e2e --since=origin/main
 
@@ -80,6 +86,9 @@ jobs:
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Add Safe Directory to Git
+        run: git config --global --add safe.directory /__w/StudyNote-NestJS/StudyNote-NestJS
 
       - name: Build code
         run: yarn lerna run build --since=origin/main
