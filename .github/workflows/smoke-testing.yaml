@@ -1,24 +1,27 @@
-name: smoke-testing
+name: Smoke Testing
 
 on:
   workflow_dispatch:
+  # push:
+  #   branches:
+  #     - main
+  #   paths-ignore:
+  #     - "**/package.json"
+  #     - "**/CHANGELOG.md"
+  #     - "**/README.md"
 
 jobs:
   setup:
     runs-on: ubuntu-latest
     container: node:18-bullseye
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-          cache: "yarn"
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Cache node modules
         id: cache-node-modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
@@ -31,61 +34,52 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     container: node:18-bullseye
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Cache node modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
 
       - name: Run unit testing with coverage
-        run: yarn lerna run test:cov --since=main
+        run: yarn lerna run test:cov --since=origin/main
 
   e2e-test:
     needs: setup
     runs-on: ubuntu-latest
     container: node:18-bullseye
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Cache node modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
 
       - name: Run end-to-end testing
-        run: yarn lerna run test:e2e --since=main
+        run: yarn lerna run test:e2e --since=origin/main
 
-  build:
+  build-code:
     needs: setup
     runs-on: ubuntu-latest
     container: node:18-bullseye
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Cache node modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
 
       - name: Build code
-        run: yarn lerna run build
+        run: yarn lerna run build --since=origin/main
